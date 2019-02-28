@@ -159,6 +159,7 @@ def load_ckpt(model, ckpt):
     state_dict = {}
     for name in ckpt:
         #if mapping[name]:
+        print(name)
         state_dict[name] = ckpt[name]
     model.load_state_dict(state_dict, strict=False)
 

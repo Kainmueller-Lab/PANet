@@ -88,6 +88,7 @@ def run_inference(
         multi_gpu_testing=False, gpu_id=0,
         check_expected_results=False):
     parent_func, child_func = get_eval_functions()
+    print('functions: ', parent_func, child_func)
     is_parent = ind_range is None
 
     def result_getter():

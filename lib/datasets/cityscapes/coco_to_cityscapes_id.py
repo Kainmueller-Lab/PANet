@@ -65,6 +65,51 @@ def cityscapes_to_coco_with_rider(cityscapes_id):
     return lookup[cityscapes_id]
 
 
+def cityscapes_to_coco_with_rider_v2(cityscapes_id):
+    lookup = {
+        0: 0,  # ... background
+        1: 1,  # person
+        2: 5,  # rider
+        3: 3,  # car
+        4: 8,  # truck
+        5: 6,  # bus
+        6: 7,  # train
+        7: 4,  # motorcycle
+        8: 8,  # bicycle
+    }
+    return lookup[cityscapes_id]
+
+
+def cityscapes_to_coco_with_rider_changed_order(cityscapes_id):
+    lookup = {
+        0: 0,   #... background
+        1: 3,   # car
+        2: 8,   # truck
+        3: 6,   # bus
+        4: 1,   # person
+        5: 5,   # rider
+        6: 2,   # bicycle
+        7: 4,   # motorcycle
+        8: 7,   # train
+    }
+    return lookup[cityscapes_id]
+
+
+def cityscapes_with_coco_categories(cityscapes_id):
+    lookup = {
+        0: 0,  # ... background
+        1: 1,  # person
+        2: 2,  # bicycle
+        3: 3,  # car
+        4: 4,  # motorcycle
+        5: -1,  # now rider, before airplane in coco
+        6: 6,  # bus
+        7: 7,  # train
+        8: 8,  # truck
+    }
+    return lookup[cityscapes_id]
+
+
 def cityscapes_to_coco_without_person_rider(cityscapes_id):
     lookup = {
         0: 0,  # ... background

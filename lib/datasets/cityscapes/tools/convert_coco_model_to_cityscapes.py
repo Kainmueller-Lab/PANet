@@ -13,6 +13,11 @@ import argparse
 import os
 import sys
 import numpy as np
+import torch
+
+lib_path = '/home/maisl/workspace/panet/PANet/lib'
+if lib_path not in sys.path:
+    sys.path.insert(0, lib_path)
 
 import datasets.cityscapes.coco_to_cityscapes_id as cs
 
@@ -45,9 +50,9 @@ def parse_args():
 
 
 def convert_coco_blobs_to_cityscape_blobs(model_dict):
-    for k, v in model_dict['blobs'].items():
+    for k, v in model_dict['model'].items():
         if v.shape[0] == NUM_COCO_CLS or v.shape[0] == 4 * NUM_COCO_CLS:
-            coco_blob = model_dict['blobs'][k]
+            coco_blob = model_dict['model'][k]
             print(
                 'Converting COCO blob {} with shape {}'.
                 format(k, coco_blob.shape)
@@ -56,7 +61,7 @@ def convert_coco_blobs_to_cityscape_blobs(model_dict):
                 coco_blob, args.convert_func
             )
             print(' -> converted shape {}'.format(cs_blob.shape))
-            model_dict['blobs'][k] = cs_blob
+            model_dict['model'][k] = cs_blob
 
 
 def convert_coco_blob_to_cityscapes_blob(coco_blob, convert_func):
@@ -70,10 +75,11 @@ def convert_coco_blob_to_cityscapes_blob(coco_blob, convert_func):
     coco_blob = coco_blob.reshape([NUM_COCO_CLS, -1] + tail_shape)
     # Default initialization uses Gaussian with mean and std to match the
     # existing parameters
-    std = coco_blob.std()
-    mean = coco_blob.mean()
+    std = coco_blob.std().numpy()
+    mean = coco_blob.mean().numpy()
     cs_shape = [NUM_CS_CLS] + list(coco_blob.shape[1:])
     cs_blob = (np.random.randn(*cs_shape) * std + mean).astype(np.float32)
+    cs_blob = torch.from_numpy(cs_blob)
 
     # Replace random parameters with COCO parameters if class mapping exists
     for i in range(NUM_CS_CLS):
@@ -86,14 +92,13 @@ def convert_coco_blob_to_cityscapes_blob(coco_blob, convert_func):
 
 
 def remove_momentum(model_dict):
-    for k in model_dict['blobs'].keys():
+    for k in model_dict['model'].keys():
         if k.endswith('_momentum'):
-            del model_dict['blobs'][k]
+            del model_dict['model'][k]
 
 
 def load_and_convert_coco_model(args):
-    with open(args.coco_model_file_name, 'r') as f:
-        model_dict = pickle.load(f)
+    model_dict = torch.load(args.coco_model_file_name, map_location=lambda storage, loc: storage)
     remove_momentum(model_dict)
     convert_coco_blobs_to_cityscape_blobs(model_dict)
     return model_dict
@@ -104,9 +109,10 @@ if __name__ == '__main__':
     print(args)
     assert os.path.exists(args.coco_model_file_name), \
         'Weights file does not exist'
-    weights = load_and_convert_coco_model(args)
+    model_dict = load_and_convert_coco_model(args)
+    torch.save(model_dict, args.out_file_name)
 
-    with open(args.out_file_name, 'w') as f:
-        pickle.dump(weights, f, protocol=pickle.HIGHEST_PROTOCOL)
+    #with open(args.out_file_name, 'w') as f:
+    #    pickle.dump(weights, f, protocol=pickle.HIGHEST_PROTOCOL)
     print('Wrote blobs to {}:'.format(args.out_file_name))
-    print(sorted(weights['blobs'].keys()))
+    print(sorted(model_dict['model'].keys()))

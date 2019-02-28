@@ -81,6 +81,7 @@ if __name__ == '__main__':
         os.makedirs(args.output_dir)
 
     cfg.VIS = args.vis
+    #cfg.CLUSTER.ON_CLUSTER = False
 
     if args.cfg_file is not None:
         merge_cfg_from_file(args.cfg_file)
@@ -93,6 +94,12 @@ if __name__ == '__main__':
     elif args.dataset == "keypoints_coco2017":
         cfg.TEST.DATASETS = ('keypoints_coco_2017_val',)
         cfg.MODEL.NUM_CLASSES = 2
+    elif args.dataset == 'cityscapes':
+        cfg.TEST.DATASETS = ('cityscapes_fine_instanceonly_seg_val',)  # cityscapes_train
+        cfg.MODEL.NUM_CLASSES = 9
+    elif args.dataset == 'cityscapes_with_coco_categories':
+        cfg.TEST.DATASETS = ('cityscapes_fine_instanceonly_seg_with_coco_cat_val',)  # cityscapes_train
+        cfg.MODEL.NUM_CLASSES = 9
     else:  # For subprocess call
         assert cfg.TEST.DATASETS, 'cfg.TEST.DATASETS shouldn\'t be empty'
     assert_and_infer_cfg()

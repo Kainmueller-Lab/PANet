@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 
-CUDA_PATH=/usr/local/cuda/
+CUDA_PATH=/home/maisl/miniconda3/envs/panetenv/
+#CUDA_PATH=/usr/local/cuda/
+
+echo $PATH
+echo $CUDA_VISIBLE_DEVICES
+which nvcc
+nvcc --version
+
+python --version
+python3 --version
 
 python3 setup.py build_ext --inplace
 rm -rf build
 
 # Choose cuda arch as you need
-CUDA_ARCH="-gencode arch=compute_30,code=sm_30 \
-           -gencode arch=compute_35,code=sm_35 \
-           -gencode arch=compute_50,code=sm_50 \
-           -gencode arch=compute_52,code=sm_52 \
-           -gencode arch=compute_60,code=sm_60 \
-           -gencode arch=compute_61,code=sm_61 "
+CUDA_ARCH="-gencode arch=compute_61,code=sm_61 "
+#	-gencode arch=compute_30,code=sm_30 \
+#           -gencode arch=compute_35,code=sm_35 \
+#           -gencode arch=compute_50,code=sm_50 \
+#           -gencode arch=compute_52,code=sm_52 \
+#           -gencode arch=compute_60,code=sm_60 \
 #          -gencode arch=compute_70,code=sm_70 "
 
 # compile NMS

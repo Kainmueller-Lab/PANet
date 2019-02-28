@@ -12,6 +12,10 @@ import sys
 
 import cityscapesscripts.evaluation.instances2dict_with_polygons as cs
 
+lib_path = '/home/maisl/workspace/panet/PANet/lib'
+if lib_path not in sys.path:
+    sys.path.insert(0, lib_path)
+
 import utils.segms as segms_util
 import utils.boxes as bboxs_util
 
@@ -84,7 +88,7 @@ def convert_cityscapes_instance_only(
     """Convert from cityscapes format to COCO instance seg format - polygons"""
     sets = [
         'gtFine_val',
-        # 'gtFine_train',
+        'gtFine_train',
         # 'gtFine_test',
 
         # 'gtCoarse_train',
@@ -93,14 +97,21 @@ def convert_cityscapes_instance_only(
     ]
     ann_dirs = [
         'gtFine_trainvaltest/gtFine/val',
-        # 'gtFine_trainvaltest/gtFine/train',
+        'gtFine_trainvaltest/gtFine/train',
         # 'gtFine_trainvaltest/gtFine/test',
 
         # 'gtCoarse/train',
         # 'gtCoarse/train_extra',
         # 'gtCoarse/val'
     ]
-    json_name = 'instancesonly_filtered_%s.json'
+
+    use_coco_categories = True
+
+    if use_coco_categories:
+        json_name = 'instancesonly_filtered_with_coco_categories_%s.json'
+    else:
+        json_name = 'instancesonly_filtered_%s.json'
+
     ends_in = '%s_polygons.json'
     img_id = 0
     ann_id = 0
@@ -117,6 +128,17 @@ def convert_cityscapes_instance_only(
         'motorcycle',
         'bicycle',
     ]
+
+    coco_categories = {
+        'person': 1,
+        'bicycle': 2,
+        'car': 3,
+        'motorcycle': 4,
+        'rider': 5,
+        'bus': 6,
+        'train': 7,
+        'truck': 8,
+    }
 
     for data_set, ann_dir in zip(sets, ann_dirs):
         print('Starting %s' % data_set)
@@ -168,10 +190,18 @@ def convert_cityscapes_instance_only(
                             ann['image_id'] = image['id']
                             ann['segmentation'] = obj['contours']
 
-                            if object_cls not in category_dict:
-                                category_dict[object_cls] = cat_id
-                                cat_id += 1
-                            ann['category_id'] = category_dict[object_cls]
+                            if use_coco_categories:
+
+                                ann['category_id'] = coco_categories[object_cls]
+
+                            else:
+
+                                if object_cls not in category_dict:
+                                    print('Adding object class to category dict: ', object_cls, ' with id ', cat_id)
+                                    category_dict[object_cls] = cat_id
+                                    cat_id += 1
+                                ann['category_id'] = category_dict[object_cls]
+
                             ann['iscrowd'] = 0
                             ann['area'] = obj['pixelCount']
                             ann['bbox'] = bboxs_util.xyxy_to_xywh(
@@ -181,14 +211,23 @@ def convert_cityscapes_instance_only(
                             annotations.append(ann)
 
         ann_dict['images'] = images
-        categories = [{"id": category_dict[name], "name": name} for name in
-                      category_dict]
+
+        if use_coco_categories:
+            categories = [{"id": coco_categories[name], "name": name} for name in coco_categories]
+        else:
+            categories = [{"id": category_dict[name], "name": name} for name in category_dict]
+
+        print('Categories: ', categories)
         ann_dict['categories'] = categories
         ann_dict['annotations'] = annotations
         print("Num categories: %s" % len(categories))
         print("Num images: %s" % len(images))
         print("Num annotations: %s" % len(annotations))
-        with open(os.path.join(out_dir, json_name % data_set), 'wb') as outfile:
+
+        # save json file with annotations
+        with open(os.path.join(out_dir, json_name % data_set), 'w') as outfile:
+            print(type(ann_dict))
+            print(ann_dict.keys())
             outfile.write(json.dumps(ann_dict))
 
 

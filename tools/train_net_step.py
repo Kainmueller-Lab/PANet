@@ -156,6 +156,13 @@ def main():
     elif args.dataset == "keypoints_coco2017":
         cfg.TRAIN.DATASETS = ('keypoints_coco_2017_train',)
         cfg.MODEL.NUM_CLASSES = 2
+    elif args.dataset == 'cityscapes':
+        cfg.TRAIN.DATASETS = ('cityscapes_fine_instanceonly_seg_train') # cityscapes_train
+        cfg.MODEL.NUM_CLASSES = 9
+    elif args.dataset == 'cityscapes_with_coco_categories':
+        cfg.TRAIN.DATASETS = ('cityscapes_fine_instanceonly_seg_with_coco_cat_train')  # cityscapes_train
+        cfg.MODEL.NUM_CLASSES = 9
+
     else:
         raise ValueError("Unexpected args.dataset: {}".format(args.dataset))
 
@@ -311,6 +318,7 @@ def main():
         load_name = args.load_ckpt
         logging.info("loading checkpoint %s", load_name)
         checkpoint = torch.load(load_name, map_location=lambda storage, loc: storage)
+        checkpoint_original = torch.load('data/pretrained_model/panet_mask_step179999.pth', map_location=lambda storage,loc: storage)
         net_utils.load_ckpt(maskRCNN, checkpoint['model'])
         if args.resume:
             args.start_step = checkpoint['step'] + 1

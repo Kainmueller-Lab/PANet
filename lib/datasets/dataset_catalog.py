@@ -40,18 +40,35 @@ RAW_DIR = 'raw_dir'
 DATASETS = {
     'cityscapes_fine_instanceonly_seg_train': {
         IM_DIR:
-            _DATA_DIR + '/cityscapes/images',
+            _DATA_DIR + '/cityscapes/images/train',
         ANN_FN:
-            _DATA_DIR + '/cityscapes/annotations/instancesonly_gtFine_train.json',
+            _DATA_DIR + '/cityscapes/annotations/instancesonly_filtered_gtFine_train.json',
+        RAW_DIR:
+            _DATA_DIR + '/cityscapes/raw'
+    },
+    'cityscapes_fine_instanceonly_seg_with_coco_cat_train': {
+        IM_DIR:
+            _DATA_DIR + '/cityscapes/images/train',
+        ANN_FN:
+            _DATA_DIR + '/cityscapes/annotations/instancesonly_filtered_with_coco_categories_gtFine_train.json',
         RAW_DIR:
             _DATA_DIR + '/cityscapes/raw'
     },
     'cityscapes_fine_instanceonly_seg_val': {
         IM_DIR:
-            _DATA_DIR + '/cityscapes/images',
+            _DATA_DIR + '/cityscapes/images/val',
         # use filtered validation as there is an issue converting contours
         ANN_FN:
             _DATA_DIR + '/cityscapes/annotations/instancesonly_filtered_gtFine_val.json',
+        RAW_DIR:
+            _DATA_DIR + '/cityscapes/raw'
+    },
+    'cityscapes_fine_instanceonly_seg_with_coco_cat_val': {
+        IM_DIR:
+            _DATA_DIR + '/cityscapes/images/val',
+        # use filtered validation as there is an issue converting contours
+        ANN_FN:
+            _DATA_DIR + '/cityscapes/annotations/instancesonly_filtered_with_coco_categories_gtFine_val.json',
         RAW_DIR:
             _DATA_DIR + '/cityscapes/raw'
     },
